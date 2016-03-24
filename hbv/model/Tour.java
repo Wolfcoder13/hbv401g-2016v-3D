@@ -7,9 +7,9 @@ public class Tour /*implements Comparable */{
 	private String name;
 	private String description;
 	private int seatsAvailable;
-	private Date date;
+	private String date;
 	private int price;
-	private String duration;
+	private int duration;
 	private String location;
 	private float rating;
 	private int numberOfRatings;
@@ -17,8 +17,8 @@ public class Tour /*implements Comparable */{
 	// private List<TourReview> reviews;
 	
 	// TODO taka af comments, initialize-a bara sem null
-	public Tour(String name, String description, int seatsAvailable, Date date,
-			String duration, float rating, int numberOfRatings, int price){
+	public Tour(String name, String description, int seatsAvailable, String date,
+			int duration, float rating, int numberOfRatings, int price){
 		this.name = name;
 		this.description = description;
 		this.seatsAvailable = seatsAvailable;
@@ -80,7 +80,7 @@ public class Tour /*implements Comparable */{
 	public int getPrice(){
 		return this.price;
 	}
-	public Date getDate(){
+	public String getDate(){
 		return this.date;
 	}
 	public float getRating(){
@@ -89,7 +89,7 @@ public class Tour /*implements Comparable */{
 	public String getLocation(){
 		return this.location;
 	}
-	public String getDuration(){
+	public int getDuration(){
 		return this.duration;
 	}
 		

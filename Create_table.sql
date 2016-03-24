@@ -5,7 +5,7 @@ CREATE TABLE Tours (
         Description TEXT,
         SeatsAvailable INT,
         Date DATE,
-        Duration CHAR(5),
+        Duration INT,
         Rating FLOAT,
 	NumberOfRatings INT,
 	Price INT
@@ -14,4 +14,9 @@ CREATE TABLE Tours (
 INSERT INTO Tours(
 	Name,Description,SeatsAvailable,Date,Duration,Rating,NumberOfRatings,Price)
 	VALUES(
-	'SnowMobile Adventure','We ride snowmobiles up on Vatnajökull',16,'2016-06-22','10hrs',4.5,55,24000);
+	'SnowMobile Adventure','We ride snowmobiles up on Vatnajökull',16,'2016-06-22',10,4.5,55,24000);
+
+INSERT INTO Tours(
+	Name,Description,SeatsAvailable,Date,Duration,Rating,NumberOfRatings,Price)
+	VALUES(
+	'Silfra scuba diving','We dive into Silfra',8,'2016-07-12',7,4.2,45,17000);

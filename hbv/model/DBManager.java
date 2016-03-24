@@ -6,6 +6,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
+import java.sql.Statement;
 
 public class DBManager {
 
@@ -19,9 +20,10 @@ public class DBManager {
 			Class.forName("org.sqlite.JDBC");
 			conn = DriverManager.getConnection("JDBC:sqlite:C:\\Users"
 					+ "\\Notandi\\Documents\\Eclipse Workspace"
-					+ "\\HBV_DayTours\\src\\HBV.db");
+					+ "\\hbv401g-2016v-3D\\src\\HBV.db");
 		}catch(ClassNotFoundException e){
 			e.printStackTrace();
+			System.out.println("no class or conn");
 		}catch(SQLException e){
 			e.printStackTrace();
 		}
@@ -31,7 +33,7 @@ public class DBManager {
 	private static void closeAll(){
 		try {
 			conn.close();
-			pst.close();
+			//pst.close();
 			res.close();
 		} catch (SQLException e) {
 			e.printStackTrace();
@@ -40,31 +42,42 @@ public class DBManager {
 	
 	public static String[][] getTours(String[] where){
 		setUp();
+		
+		Statement stmtTours = null;
+		Statement stmtRows = null;
+		
 		String[][] tours = null;
 		
 		// Set WHERE skilyrðin upp í streng
 		String whereString = "";
 		for(int i = 0; i<where.length;i++){
-			if(i==where.length-1) whereString += where[i];
-			else whereString += where[i]+" and ";
+			if(where[i]!=null) whereString += where[i]+" AND ";
 		}
+		// get rid of last "and"
+		whereString = whereString.substring(0, whereString.length()-5);
+		// Debug
+		System.out.println(whereString);
+		String whereTest = "price>0 AND duration>0";
 		try {
-			// Fá fjölda raða sem verða í res
-			pst = conn.prepareStatement("SELECT COUNT(*) FROM Tours;");
-			res = pst.executeQuery();
-			int rows = Integer.valueOf(res.getString(1));	
+			// get row count
+			stmtRows = conn.createStatement();
+			res =stmtRows.executeQuery("SELECT COUNT(*) FROM Tours;");
 			
-			// Sækja tours gögnin sjálf
-			pst = conn.prepareStatement("SELECT * FROM Tours WHERE ?;");
-			pst.setString(1, whereString);
-			res = pst.executeQuery();
+			int rows = Integer.valueOf(res.getString(1));
+			//debug
+			System.out.println("rows: "+rows);
 			
-			// Fá fjölda dálka í res
+			// get tour data
+			stmtTours = conn.createStatement();
+			res = stmtTours.executeQuery("SELECT * FROM Tours WHERE "+whereString+";");
+	
+			// get column count 
 			ResultSetMetaData rsmd = res.getMetaData();
 			int cols = rsmd.getColumnCount();
-			// Færi gögnin úr res í tvívítt fylki til að skila (væri 
-			// mögulega skynsamlegast að búa bara strax til tours 
-			// listann hér úr res gögnunum og skila honum bara).
+			// debug
+			System.out.println("columns: "+cols);
+			
+			// transfer data from res to 2d array tours
 			tours = new String[rows][cols];
 			int i = 0;
 			while(res.next()){
@@ -75,8 +88,9 @@ public class DBManager {
 			}
 		} catch (SQLException e) {
 			e.printStackTrace();
+		} finally{
+			closeAll();
 		}
-		closeAll();
 		return tours;
 	}
 	
@@ -109,8 +123,9 @@ public class DBManager {
 			pst.executeQuery();
 		} catch (SQLException e) {
 			e.printStackTrace();
+		} finally{ 
+			closeAll();	
 		}
-		closeAll();	
 	}
 	
 	public static void updateRating(String tourName, float newRating, int numberOfRatings){
@@ -129,7 +144,8 @@ public class DBManager {
 			pst.executeQuery();
 		} catch (SQLException e) {
 			e.printStackTrace();
+		} finally{
+			closeAll();	
 		}
-		closeAll();	
 	}
 }
