@@ -1,6 +1,8 @@
 package hbv.model;
 
+import java.text.DecimalFormat;
 import java.util.Date;
+import java.util.Locale;
 
 // TODO græja Comparable neðst og tengingu við guides,reviews
 public class Tour /*implements Comparable */{
@@ -61,10 +63,14 @@ public class Tour /*implements Comparable */{
 	}
 	
 	public void updateRating(int rating){
+		System.out.println("old inner rating: "+this.rating);
 		int expand = (int)(this.rating*numberOfRatings);
+		System.out.println("expand: "+expand);
 		int newExpand = expand+rating;
+		System.out.println("newExpand: "+newExpand);
 		numberOfRatings++;
-		this.rating = newExpand/numberOfRatings;
+		this.rating = (float)newExpand/numberOfRatings;
+		System.out.println("new inner rating: "+this.rating);
 		DBManager.updateRating(this.name, this.rating, this.numberOfRatings);
 	}
 	
@@ -83,14 +89,18 @@ public class Tour /*implements Comparable */{
 	public String getDate(){
 		return this.date;
 	}
-	public float getRating(){
-		return this.rating;
+	public String getRating(){
+		return String.format(Locale.ENGLISH,"%.1f", this.rating);
 	}
 	public String getLocation(){
 		return this.location;
 	}
 	public int getDuration(){
 		return this.duration;
+	}
+	
+	public int getNumberOfRatings(){
+		return this.numberOfRatings;
 	}
 		
 	/*

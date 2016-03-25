@@ -57,7 +57,6 @@ public class DBManager {
 		whereString = whereString.substring(0, whereString.length()-5);
 		// Debug
 		System.out.println(whereString);
-		String whereTest = "price>0 AND duration>0";
 		try {
 			// get row count
 			stmtRows = conn.createStatement();
@@ -116,11 +115,11 @@ public class DBManager {
 		setUp();
 		
 		try {
-			pst = conn.prepareStatement("UPDATE Tours SET availableSeats=? "
+			pst = conn.prepareStatement("UPDATE Tours SET SeatsAvailable=? "
 					+ "WHERE name=?");
 			pst.setString(1, String.valueOf(newSeats));
 			pst.setString(2, tourName);
-			pst.executeQuery();
+			pst.execute();
 		} catch (SQLException e) {
 			e.printStackTrace();
 		} finally{ 
@@ -135,13 +134,13 @@ public class DBManager {
 					+ "WHERE name=?");
 			pst.setString(1, String.valueOf(newRating));
 			pst.setString(2, tourName);
-			pst.executeQuery();
+			pst.execute();
 			
 			pst = conn.prepareStatement("UPDATE Tours SET NumberOfRatings=? "
 					+ "WHERE name=?");
 			pst.setString(1, String.valueOf(numberOfRatings));
 			pst.setString(2, tourName);
-			pst.executeQuery();
+			pst.execute();
 		} catch (SQLException e) {
 			e.printStackTrace();
 		} finally{

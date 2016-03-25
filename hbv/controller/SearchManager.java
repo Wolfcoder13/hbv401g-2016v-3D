@@ -13,7 +13,8 @@ public class SearchManager {
 			String dateLower,String dateUpper,String type,int minAvailableSeats, String tourName,
 			String location){
 				
-		String[] where = new String[10]; // skilyrðin fyrir leit
+		String[] where = new String[10]; // skilyrðin fyrir leitarniðurstöður
+		
 		where[0] = "price>"+priceLow; 
 		if(priceHigh!=0) where[1] = "price<"+priceHigh; // check if value was chosen
 		
@@ -48,8 +49,23 @@ public class SearchManager {
 	
 	// Bara til að testa
 	public static void main(String[] args) {
-		createList(0,0,0,0,"","","",0,"","");
+
+		createList(0,30000,5,16,"","","",0,"","");
 		System.out.println(tours.get(0).getName());
+		
+		// updateSeats debug
+		System.out.println("old seats: "+tours.get(0).getSeatsAvailable());
+		boolean sold = tours.get(0).bookSeats(4);
+		if(!sold) System.out.println("Not enough seats for purchase");
+		System.out.println("new seats: "+tours.get(0).getSeatsAvailable());
+		
+		// updateRating debug
+		System.out.println("old displayed rating: "+tours.get(0).getRating());
+		System.out.println("old NumberOfRatings: "+tours.get(0).getNumberOfRatings());
+		tours.get(0).updateRating(1);
+		System.out.println("new displayed rating: "+tours.get(0).getRating());
+		System.out.println("new NumberOfRatings: "+tours.get(0).getNumberOfRatings());
+
 	}
 
 }
