@@ -1,71 +1,79 @@
 package hbv.controller;
 
-import java.text.DateFormat;
-import java.util.Date;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.util.ArrayList;
+import hbv.view.*;
 import hbv.model.*;
 
 public class SearchManager {
 
-	private static ArrayList<Tour> tours = new ArrayList<Tour>();
+	private Display view;
 	
-	public static void createList(int priceLow,int priceHigh,int durationLow,int durationHigh,
-			String dateLower,String dateUpper,String type,int minAvailableSeats, String tourName,
-			String location){
-				
-		String[] where = new String[10]; // skilyrðin fyrir leitarniðurstöður
-		
-		where[0] = "price>"+priceLow; 
-		if(priceHigh!=0) where[1] = "price<"+priceHigh; // check if value was chosen
-		
-		where[2] = "duration>"+durationLow;
-		if(durationHigh!=0)	where[3] = "duration<"+durationHigh; 
-
-		//where[4] = "Date>"+dateLower; // TODO must read up on dates, using strings..
-		//where[5] = "Date<"+dateUpper; // TODO -||-
-		if(!type.equals("")) where[6] = "Type="+type; // Fyrirfram ákveðnir strengir TODO en ef margir?
-
-		if(minAvailableSeats!=0) where[7] = "AvailableSeats>="+minAvailableSeats;
-
-		if(!location.equals("")) where[8] = "Location="+location;
-		
-		if(!tourName.equals("")) where[9] = "Name LIKE %"+tourName+"%";
-		
-		String[][] data = DBManager.getTours(where);
-		
-		/* Debug
-		for(int i=0;i<data.length;i++){
-			for(int j=0;j<data[0].length;j++){
-				System.out.println(data[i][j]);
-			}		
-		}*/
-
-		for(int i=0; i<data.length;i++){
-			tours.add(new Tour(data[i][0],data[i][1],Integer.valueOf(data[i][2]),data[i][3],
-					Integer.valueOf(data[i][4]),Float.valueOf(data[i][5]),Integer.valueOf(data[i][6]),
-					Integer.valueOf(data[i][7])));
-		}
+	private ArrayList<Tour> tours = new ArrayList<Tour>();
+	
+	public SearchManager(Display view){
+		this.view = view;
+		this.view.addSearchListener(new searchHandler());
 	}
 	
+	public void createList(){
+		
+		ArrayList<String> searchParams = new ArrayList<String>();
+		
+		searchParams.add("price>="+String.valueOf(((MockDisplay)this.view).getPriceLower()));
+		searchParams.add("price<="+String.valueOf(((MockDisplay)this.view).getPriceHigher()));
+		searchParams.add("Duration>="+String.valueOf(((MockDisplay)this.view).getDurationLow()));
+		searchParams.add("Duration<="+String.valueOf(((MockDisplay)this.view).getDurationHigh()));
+		searchParams.add("Date>='"+String.valueOf(((MockDisplay)this.view).getDateLower())+"'");
+		searchParams.add("Date<='"+String.valueOf(((MockDisplay)this.view).getDateHigher())+"'");
+		searchParams.add("SeatsAvailable>="+String.valueOf(((MockDisplay)this.view).getMinAvailableSeats()));
+		searchParams.add("Destination='"+((MockDisplay)this.view).getDestination()+"'");
+		searchParams.add("Departure='"+((MockDisplay)this.view).getDepartureLocation()+"'");
+		searchParams.add("Type='"+((MockDisplay)this.view).getTourType()+"'");
+		searchParams.add("Name LIKE '%"+((MockDisplay)this.view).getTourName()+("%'"));
+
+		// debug: gögnin frá DBManager
+		String[][] dbData = DBManager.getTours(searchParams);
+		for(int i=0;i<dbData.length;i++){
+			for(int j=0;j<dbData[0].length;j++){
+				System.out.println(dbData[i][j]);
+			}
+		}
+		
+		// Búa til lista af tours
+		// TODO þarf að laga þ.a. það þurfi ekki að tékka á null-dálkum
+		if(dbData[0][0]!=null){
+			for(int i=0; i<dbData.length;i++){
+				if(dbData[i][0]!=null){
+					tours.add(new Tour(dbData[i][0],dbData[i][1],Integer.valueOf(dbData[i][2]),dbData[i][3],
+							Integer.valueOf(dbData[i][4]),Float.valueOf(dbData[i][5]),Integer.valueOf(dbData[i][6]),
+							Integer.valueOf(dbData[i][7]),dbData[i][8],dbData[i][9],dbData[i][10]));
+				}		
+			}
+			//debug
+			System.out.println(tours.get(0).getName());
+		}else{
+			System.out.println("no results");
+		}
+
+	}
+	
+	class searchHandler implements ActionListener{
+		@Override
+		public void actionPerformed(ActionEvent e) {
+			createList();
+		}
+	}
+		
 	// Bara til að testa
 	public static void main(String[] args) {
 
-		createList(0,30000,5,16,"","","",0,"","");
-		System.out.println(tours.get(0).getName());
+		Display view = new MockDisplay();
+		SearchManager controller = new SearchManager(view);
 		
-		// updateSeats debug
-		System.out.println("old seats: "+tours.get(0).getSeatsAvailable());
-		boolean sold = tours.get(0).bookSeats(4);
-		if(!sold) System.out.println("Not enough seats for purchase");
-		System.out.println("new seats: "+tours.get(0).getSeatsAvailable());
+		((MockDisplay)view).setVisible(true);
 		
-		// updateRating debug
-		System.out.println("old displayed rating: "+tours.get(0).getRating());
-		System.out.println("old NumberOfRatings: "+tours.get(0).getNumberOfRatings());
-		tours.get(0).updateRating(1);
-		System.out.println("new displayed rating: "+tours.get(0).getRating());
-		System.out.println("new NumberOfRatings: "+tours.get(0).getNumberOfRatings());
-
 	}
 
 }

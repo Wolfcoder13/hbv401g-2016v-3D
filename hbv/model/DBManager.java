@@ -7,6 +7,7 @@ import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.ArrayList;
 
 public class DBManager {
 
@@ -40,7 +41,7 @@ public class DBManager {
 		}
 	}
 	
-	public static String[][] getTours(String[] where){
+	public static String[][] getTours(ArrayList<String> where){
 		setUp();
 		
 		Statement stmtTours = null;
@@ -50,9 +51,10 @@ public class DBManager {
 		
 		// Set WHERE skilyrðin upp í streng
 		String whereString = "";
-		for(int i = 0; i<where.length;i++){
-			if(where[i]!=null) whereString += where[i]+" AND ";
+		for(String x: where){
+			whereString += x+" AND ";
 		}
+
 		// get rid of last "and"
 		whereString = whereString.substring(0, whereString.length()-5);
 		// Debug
@@ -75,6 +77,7 @@ public class DBManager {
 			int cols = rsmd.getColumnCount();
 			// debug
 			System.out.println("columns: "+cols);
+			
 			
 			// transfer data from res to 2d array tours
 			tours = new String[rows][cols];

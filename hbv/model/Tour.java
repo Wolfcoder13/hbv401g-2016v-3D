@@ -1,7 +1,7 @@
 package hbv.model;
 
 import java.text.DecimalFormat;
-import java.util.Date;
+import java.sql.Date;
 import java.util.Locale;
 
 // TODO græja Comparable neðst og tengingu við guides,reviews
@@ -12,15 +12,18 @@ public class Tour /*implements Comparable */{
 	private String date;
 	private int price;
 	private int duration;
-	private String location;
+	private String destination;
 	private float rating;
 	private int numberOfRatings;
+	private String departureLocation;
+	private String type;
 	// private List<Guide> guides;
 	// private List<TourReview> reviews;
 	
 	// TODO taka af comments, initialize-a bara sem null
 	public Tour(String name, String description, int seatsAvailable, String date,
-			int duration, float rating, int numberOfRatings, int price){
+			int duration, float rating, int numberOfRatings, int price, String destination, 
+			String departureLocation, String type){
 		this.name = name;
 		this.description = description;
 		this.seatsAvailable = seatsAvailable;
@@ -29,6 +32,10 @@ public class Tour /*implements Comparable */{
 		this.rating = rating;
 		this.numberOfRatings = numberOfRatings;
 		this.price = price;
+		this.departureLocation = departureLocation;
+		this.type = type;
+		this.destination = destination;
+		
 		// guides = null;
 		// reviews = null;
 	}
@@ -93,7 +100,7 @@ public class Tour /*implements Comparable */{
 		return String.format(Locale.ENGLISH,"%.1f", this.rating);
 	}
 	public String getLocation(){
-		return this.location;
+		return this.destination;
 	}
 	public int getDuration(){
 		return this.duration;
@@ -101,6 +108,14 @@ public class Tour /*implements Comparable */{
 	
 	public int getNumberOfRatings(){
 		return this.numberOfRatings;
+	}
+	
+	public String getDestination(){
+		return this.destination;
+	}
+	
+	public String getDepartureLocation(){
+		return this.getDepartureLocation();
 	}
 		
 	/*
