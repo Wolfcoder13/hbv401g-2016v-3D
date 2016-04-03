@@ -21,26 +21,28 @@ public class SearchManager {
 		
 		ArrayList<String> searchParams = new ArrayList<String>();
 		
-		searchParams.add("price>="+String.valueOf(((MockDisplay)this.view).getPriceLower()));
-		searchParams.add("price<="+String.valueOf(((MockDisplay)this.view).getPriceHigher()));
-		searchParams.add("Duration>="+String.valueOf(((MockDisplay)this.view).getDurationLow()));
-		searchParams.add("Duration<="+String.valueOf(((MockDisplay)this.view).getDurationHigh()));
-		searchParams.add("Date>='"+String.valueOf(((MockDisplay)this.view).getDateLower())+"'");
-		searchParams.add("Date<='"+String.valueOf(((MockDisplay)this.view).getDateHigher())+"'");
-		searchParams.add("SeatsAvailable>="+String.valueOf(((MockDisplay)this.view).getMinAvailableSeats()));
-		searchParams.add("Destination='"+((MockDisplay)this.view).getDestination()+"'");
-		searchParams.add("Departure='"+((MockDisplay)this.view).getDepartureLocation()+"'");
-		searchParams.add("Type='"+((MockDisplay)this.view).getTourType()+"'");
-		searchParams.add("Name LIKE '%"+((MockDisplay)this.view).getTourName()+("%'"));
+		searchParams.add("price>="+String.valueOf(this.view.getPriceLower()));
+		searchParams.add("price<="+String.valueOf(this.view.getPriceHigher()));
+		searchParams.add("Duration>="+String.valueOf(this.view.getDurationLow()));
+		searchParams.add("Duration<="+String.valueOf(this.view.getDurationHigh()));
+		searchParams.add("Date>='"+String.valueOf(this.view.getDateLower())+"'");
+		searchParams.add("Date<='"+String.valueOf(this.view.getDateHigher())+"'");
+		searchParams.add("SeatsAvailable>="+String.valueOf(this.view.getMinAvailableSeats()));
+		searchParams.add("Destination='"+(this.view.getDestination()+"'"));
+		searchParams.add("Departure='"+(this.view.getDepartureLocation()+"'"));
+		searchParams.add("Type='"+(this.view.getTourType()+"'"));
+		searchParams.add("Name LIKE '%"+(this.view.getTourName()+("%'")));
 
-		// debug: gögnin frá DBManager
+		
 		String[][] dbData = DBManager.getTours(searchParams);
+		
+		// debug: gögnin frá DBManager
 		for(int i=0;i<dbData.length;i++){
 			for(int j=0;j<dbData[0].length;j++){
 				System.out.println(dbData[i][j]);
 			}
 		}
-		
+		if(tours!=null) tours = new ArrayList<Tour>(); 
 		// Búa til lista af tours
 		// TODO þarf að laga þ.a. það þurfi ekki að tékka á null-dálkum
 		if(dbData[0][0]!=null){
@@ -49,20 +51,29 @@ public class SearchManager {
 					tours.add(new Tour(dbData[i][0],dbData[i][1],Integer.valueOf(dbData[i][2]),dbData[i][3],
 							Integer.valueOf(dbData[i][4]),Float.valueOf(dbData[i][5]),Integer.valueOf(dbData[i][6]),
 							Integer.valueOf(dbData[i][7]),dbData[i][8],dbData[i][9],dbData[i][10]));
-				}		
+				}
 			}
 			//debug
-			System.out.println(tours.get(0).getName());
+			//System.out.println(tours.get(0).getName());
 		}else{
 			System.out.println("no results");
 		}
 
 	}
 	
+	public void publishList(){
+		// TODO implement
+	}
+	
+	public ArrayList<Tour> getTours(){
+		return this.tours;
+	}
+	
 	class searchHandler implements ActionListener{
 		@Override
 		public void actionPerformed(ActionEvent e) {
 			createList();
+			publishList();
 		}
 	}
 		

@@ -98,6 +98,10 @@ public class MockDisplay extends JFrame implements Display{
 	public String getDepartureLocation() {
 		return departureLocation;
 	}
+	
+	public void pushSearchBtn(){
+		searchBtn.doClick();
+	}
 
 	
 	
