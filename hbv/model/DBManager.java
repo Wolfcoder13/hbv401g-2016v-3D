@@ -62,7 +62,7 @@ public class DBManager {
 		try {
 			// get row count
 			stmtRows = conn.createStatement();
-			res =stmtRows.executeQuery("SELECT COUNT(*) FROM Tours;");
+			res =stmtRows.executeQuery("SELECT COUNT(*) FROM Tours WHERE "+whereString+";");
 			
 			int rows = Integer.valueOf(res.getString(1));
 			//debug

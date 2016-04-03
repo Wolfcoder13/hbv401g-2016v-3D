@@ -10,11 +10,12 @@ public class SearchManager {
 
 	private Display view;
 	
-	private ArrayList<Tour> tours = new ArrayList<Tour>();
+	private ArrayList<Tour> tours;
 	
 	public SearchManager(Display view){
 		this.view = view;
 		this.view.addSearchListener(new searchHandler());
+		this.tours = new ArrayList<Tour>();
 	}
 	
 	public void createList(){
@@ -42,23 +43,14 @@ public class SearchManager {
 				System.out.println(dbData[i][j]);
 			}
 		}
-		if(tours!=null) tours = new ArrayList<Tour>(); 
+		
+		tours.clear(); 
 		// Búa til lista af tours
-		// TODO þarf að laga þ.a. það þurfi ekki að tékka á null-dálkum
-		if(dbData[0][0]!=null){
-			for(int i=0; i<dbData.length;i++){
-				if(dbData[i][0]!=null){
-					tours.add(new Tour(dbData[i][0],dbData[i][1],Integer.valueOf(dbData[i][2]),dbData[i][3],
-							Integer.valueOf(dbData[i][4]),Float.valueOf(dbData[i][5]),Integer.valueOf(dbData[i][6]),
-							Integer.valueOf(dbData[i][7]),dbData[i][8],dbData[i][9],dbData[i][10]));
-				}
-			}
-			//debug
-			//System.out.println(tours.get(0).getName());
-		}else{
-			System.out.println("no results");
+		for(int i=0; i<dbData.length;i++){
+			tours.add(new Tour(dbData[i][0],dbData[i][1],Integer.valueOf(dbData[i][2]),dbData[i][3],
+				Integer.valueOf(dbData[i][4]),Float.valueOf(dbData[i][5]),Integer.valueOf(dbData[i][6]),
+				Integer.valueOf(dbData[i][7]),dbData[i][8],dbData[i][9],dbData[i][10]));
 		}
-
 	}
 	
 	public void publishList(){
