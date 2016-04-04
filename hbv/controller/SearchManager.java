@@ -37,7 +37,7 @@ public class SearchManager {
 		
 		String[][] dbData = DBManager.getTours(searchParams);
 		
-		// debug: gögnin frá DBManager
+		// debug: gï¿½gnin frï¿½ DBManager
 		for(int i=0;i<dbData.length;i++){
 			for(int j=0;j<dbData[0].length;j++){
 				System.out.println(dbData[i][j]);
@@ -45,7 +45,7 @@ public class SearchManager {
 		}
 		
 		tours.clear(); 
-		// Búa til lista af tours
+		// Bï¿½a til lista af tours
 		for(int i=0; i<dbData.length;i++){
 			tours.add(new Tour(dbData[i][0],dbData[i][1],Integer.valueOf(dbData[i][2]),dbData[i][3],
 				Integer.valueOf(dbData[i][4]),Float.valueOf(dbData[i][5]),Integer.valueOf(dbData[i][6]),
@@ -56,6 +56,10 @@ public class SearchManager {
 	public void publishList(){
 		// TODO implement
 	}
+        
+        public boolean isToursEmpty(){
+            return false;
+        }
 	
 	public ArrayList<Tour> getTours(){
 		return this.tours;
@@ -69,7 +73,7 @@ public class SearchManager {
 		}
 	}
 		
-	// Bara til að testa
+	// Bara til aï¿½ testa
 	public static void main(String[] args) {
 
 		Display view = new MockDisplay();
