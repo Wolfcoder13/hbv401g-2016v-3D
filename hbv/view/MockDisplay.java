@@ -25,6 +25,7 @@ public class MockDisplay extends JFrame implements Display{
 	private String destination;
 	private String departureLocation;
 	
+	// Bý til display sem hefur bara einn takka. 
 	public MockDisplay(){
 		this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		this.setSize(400,200);
@@ -37,13 +38,15 @@ public class MockDisplay extends JFrame implements Display{
 		initMockVars();
 	}
 	
+	// stilli breytur sem verða notaðar í prófun.
+	@SuppressWarnings("deprecation")
 	private void initMockVars(){
 		priceLower = 4;
 		priceHigher = 100000;
 		durationLow = 3;
 		durationHigh = 20;
 		dateLower = new Date(1); 
-		dateHigher = new Date(2017,5,5); // hægt að setja suppresswarnings eða finna réttu leiðina
+		dateHigher = new Date(2017,5,5);
 		tourType = "Adventure";
 		minAvailableSeats = 6;
 		tourName = "Snow";

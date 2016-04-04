@@ -34,13 +34,13 @@ public class DBManager {
 	private static void closeAll(){
 		try {
 			conn.close();
-			//pst.close();
 			res.close();
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}
 	}
 	
+	// Þetta er eina fallið sem skiptir máli fyrir þessi skil.
 	public static String[][] getTours(ArrayList<String> where){
 		setUp();
 		
@@ -55,31 +55,24 @@ public class DBManager {
 			whereString += x+" AND ";
 		}
 
-		// get rid of last "and"
+		// losna við síðasta "AND".
 		whereString = whereString.substring(0, whereString.length()-5);
-		// Debug
-		System.out.println(whereString);
+
 		try {
-			// get row count
+			// Fá fjölda raða í leitarniðurstöðunum.
 			stmtRows = conn.createStatement();
-			res =stmtRows.executeQuery("SELECT COUNT(*) FROM Tours WHERE "+whereString+";");
-			
+			res =stmtRows.executeQuery("SELECT COUNT(*) FROM Tours WHERE "+whereString+";");		
 			int rows = Integer.valueOf(res.getString(1));
-			//debug
-			System.out.println("rows: "+rows);
-			
-			// get tour data
+
+			// Fá gögnin sjálf.
 			stmtTours = conn.createStatement();
 			res = stmtTours.executeQuery("SELECT * FROM Tours WHERE "+whereString+";");
 	
-			// get column count 
-			ResultSetMetaData rsmd = res.getMetaData();
-			int cols = rsmd.getColumnCount();
-			// debug
-			System.out.println("columns: "+cols);
+			// Fá fjölda dálka í leitarniðurstöðunum.
+ 			ResultSetMetaData rsmd = res.getMetaData();
+			int cols = rsmd.getColumnCount();	
 			
-			
-			// transfer data from res to 2d array tours
+			// Færi gögnin á almennara form (2D fylki) til að skila.
 			tours = new String[rows][cols];
 			int i = 0;
 			while(res.next()){
