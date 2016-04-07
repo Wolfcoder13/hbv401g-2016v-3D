@@ -1,16 +1,16 @@
 package hbv.view;
 
-import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.util.ArrayList;
 import java.sql.Date;
 
 import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 
+// Sjá comments í MockDisplay klasanum.
 public class MockDisplay3 extends JFrame implements Display{
 
+	private static final long serialVersionUID = 1L;
 	private JPanel panel;
 	private JButton searchBtn;
 	
@@ -37,18 +37,20 @@ public class MockDisplay3 extends JFrame implements Display{
 		
 		initMockVars();
 	}
-        
-        public void clickButton(){
-            searchBtn.doClick();
-        }
+    
+	// sjá comment í MockDisplay klasanum fyrir fallið pushSearchBtn.
+    public void clickButton(){
+        searchBtn.doClick();
+    }
 	
+	@SuppressWarnings("deprecation")
 	private void initMockVars(){
 		priceLower = 4;
 		priceHigher = 100000;
 		durationLow = 3;
 		durationHigh = 20;
 		dateLower = new Date(1); 
-		dateHigher = new Date(2017,5,5); // hï¿½gt aï¿½ setja suppresswarnings eï¿½a finna rï¿½ttu leiï¿½ina
+		dateHigher = new Date(2017,5,5);
 		tourType = "Adventure";
 		minAvailableSeats = -6;
 		tourName = "Snow";

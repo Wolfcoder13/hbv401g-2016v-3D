@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import hbv.view.*;
 import hbv.model.*;
 
+// Þessi controller klasi inniheldur fallið sem skal prófa, þ.e. createList().
 public class SearchManager {
 
 	private Display view;
@@ -18,12 +19,27 @@ public class SearchManager {
 		this.tours = new ArrayList<Tour>();
 	}
 	
+	/*
+	 * Þetta er prófunarfallið. 
+	 * Þar sem hugsunin hér var sú að fylgja MVC-módelinu algjörlega, þá varð niðurstaðan 
+	 * sú sem hér sést. view-ið ætti þá að vera alveg óháð controllernum (þessum klasa) 
+	 * og view-ið myndi því bara geyma upplýsingar frá notanda án þess að meðhöndla þær
+	 * upplýsingar á nokkurn hátt. Þessi klasi ætti svo að sækja leitarskilyrðin frá 
+	 * viewinu til að geta svo sótt tilsvarandi gögn úr DBManager. Þetta er verk createList() 
+	 * og því þurftum við að útfæra gettera fyrir breyturnar í mockDisplayinu til að geta
+	 * prófað þetta fall rétt.
+	 * 
+	 * Við munum hins vegar breyta þessu þ.a. UI-ið sér um handlers fyrir gögnin sjálf, eins
+	 * og við höfðum þetta upphaflega áður en við fórum að kynna okkur MVC almennilega.
+	 * Við gátum þó ekki breytt þessu núna þar sem það væri ekki í samræmi við skilin eins
+	 * og þau voru á sunnudag.
+	 */
 	public void createList(){
 		
-		// BÃ½ til lista, searchParams, sem mun geyma leitarupplÃ½singar frÃ¡ notanda.
+		// Bý til lista, searchParams, sem mun geyma leitarskilyrðin frá notanda.
 		ArrayList<String> searchParams = new ArrayList<String>();
-		// SÃ¦ki leitarupplÃ½singarnar og set Ã­ searchParams Ã¾.a. Ã¾eir passi sem WHERE
-		// hlutinn Ã­ SQL-fyrirspurn.
+		// Sæki leitarskilyrðin frá viewinu og set í searchParams þ.a. þeir passi
+		// sem WHERE hlutinn í SQL-fyrirspurn.
 		searchParams.add("price>="+String.valueOf(this.view.getPriceLower()));
 		searchParams.add("price<="+String.valueOf(this.view.getPriceHigher()));
 		searchParams.add("Duration>="+String.valueOf(this.view.getDurationLow()));
@@ -36,11 +52,12 @@ public class SearchManager {
 		searchParams.add("Type='"+(this.view.getTourType()+"'"));
 		searchParams.add("Name LIKE '%"+(this.view.getTourName()+("%'")));
 
+		// Fæ gögnin frá DBManager miðað við leitarskilyrðin.
 		String[][] dbData = DBManager.getTours(searchParams);
 				
-		// hreinsa allt Ãºr tours fyrir nÃ¦stu leitarniÃ°urstÃ¶Ã°ur.
-		tours.clear(); 
-		// BÃ½ til lista af tours.
+		// hreinsa gömlu leitarniðurstöðurnar úr tours (ef einhverjar eru).
+		tours.clear();
+		// Bý til Tour-hluti í samræmi við leitarniðurstöður og set í listann tours.
 		for(int i=0; i<dbData.length;i++){
 			tours.add(new Tour(dbData[i][0],dbData[i][1],Integer.valueOf(dbData[i][2]),dbData[i][3],
 				Integer.valueOf(dbData[i][4]),Float.valueOf(dbData[i][5]),Integer.valueOf(dbData[i][6]),
@@ -48,20 +65,23 @@ public class SearchManager {
 		}
 	}
 	
+	// Verður notað til að birta tiltekin lykilgögn úr tours-listanum, sem lista á UI, sem 
+	// notandi getur svo smellt á til að skoða nánar.
 	public void publishList(){
-		// TODO implement Ã¾egar UI er tilbÃºiÃ°.
+		// TODO implement þegar UI er tilbúið.
 	}
-        
-        public boolean isToursEmpty(){
-            return false;
-        }
+    
+	// Bara fyrir testing.
+    public boolean isToursEmpty(){
+        return false;
+    }
 	
-	// bara fyrir testing til aÃ° athuga innihald tours.
+	// bara fyrir testing til að athuga innihald tours.
 	public ArrayList<Tour> getTours(){
 		return this.tours;
 	}
 	
-	// listener fyrir search takkann.
+	// Handler fyrir search takkann.
 	class searchHandler implements ActionListener{
 		@Override
 		public void actionPerformed(ActionEvent e) {
@@ -70,8 +90,11 @@ public class SearchManager {
 		}
 	}
 	
+	@SuppressWarnings("unused")
 	public static void main(String[] args) {
 
+		// Bý til instance af mockUI-inu sem controllerinn fær svo
+		// til að sækja upplýsingar frá.
 		Display view = new MockDisplay();
 		SearchManager controller = new SearchManager(view);
 		

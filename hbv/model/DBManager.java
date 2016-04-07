@@ -9,6 +9,14 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
 
+/* Þessi class er ekki mockObject þar sem við vorum byrjaðir
+   á honum fyrir. Okkur fannst því óþarfi að að vera gera annan
+   klasa þar sem þessi var alveg tilbúinn til notkunar fyrir þetta 
+   verkefni.
+
+   Eina fallið í klasanum sem skiptir máli fyrir verkefnið
+   er í raun getTours().
+*/
 public class DBManager {
 
 	private static Connection conn = null;
@@ -46,34 +54,35 @@ public class DBManager {
 		
 		Statement stmtTours = null;
 		Statement stmtRows = null;
-		
+		// Fylli tours á eftir með gögnunum í resultsettinu sem fæst úr SQL-fyrirspurninni.
 		String[][] tours = null;
 		
-		// Set WHERE skilyrðin upp í streng
+		// Set WHERE skilyrðin upp í streng.
 		String whereString = "";
 		for(String x: where){
 			whereString += x+" AND ";
 		}
 
-		// losna við síðasta "AND".
+		// Losna við síðasta "AND" í strengnum.
 		whereString = whereString.substring(0, whereString.length()-5);
 
 		try {
-			// Fá fjölda raða í leitarniðurstöðunum.
+			// Fæ fjölda raða sem munu koma út úr SQL-fyrirspurninni.
 			stmtRows = conn.createStatement();
 			res =stmtRows.executeQuery("SELECT COUNT(*) FROM Tours WHERE "+whereString+";");		
 			int rows = Integer.valueOf(res.getString(1));
 
-			// Fá gögnin sjálf.
+			// Fæ gögnin sjálf.
 			stmtTours = conn.createStatement();
 			res = stmtTours.executeQuery("SELECT * FROM Tours WHERE "+whereString+";");
 	
-			// Fá fjölda dálka í leitarniðurstöðunum.
+			// Fæ fjölda dálka í leitarniðurstöðunum.
  			ResultSetMetaData rsmd = res.getMetaData();
 			int cols = rsmd.getColumnCount();	
 			
-			// Færi gögnin á almennara form (2D fylki) til að skila.
+			// Þurfti að vita víddirnar á resultSet til að geta upphafsstillt tours hér.
 			tours = new String[rows][cols];
+			// Færi svo gögnin í óháða 2D fylkið tours, sem verður skilagildi fallsins.
 			int i = 0;
 			while(res.next()){
 				for(int j = 0; j<cols;j++){
@@ -96,7 +105,7 @@ public class DBManager {
 	}
 	
 	// TODO klára
-	public static String[][] getGuides(/* ... */){
+	public static String[][] getGuides(){
 		String[][] guides = null;
 		return guides;
 	}
