@@ -115,6 +115,7 @@ public class MockDisplay extends JFrame implements Display{
 	// hægt að sjá að þetta fall er ekkert notað í test-cases).
 	// Þetta á því ekkert að vera hérna, bara gleymdist, og við gleymdum einnig að
 	// taka út sjálfan takkann, enda varð hann óþarfur eftir þetta.
+	// Hef þetta þó með hérna svo þetta sé í samræmi við skilin á sunnudaginn.
 	public void pushSearchBtn(){
 		searchBtn.doClick();
 	}

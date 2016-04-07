@@ -1,11 +1,18 @@
 package hbv.model;
 
-import java.text.DecimalFormat;
-import java.sql.Date;
 import java.util.Locale;
 
-// TODO græja Comparable neðst og tengingu við guides,reviews
-public class Tour /*implements Comparable */{
+/* Þessi class er ekki mockObject þar sem við vorum byrjaðir
+   á honum fyrir. Okkur fannst því óþarfi að að vera gera annan
+   klasa þar sem þessi var alveg tilbúinn til notkunar fyrir þetta 
+   verkefni.
+
+   Eina fallið í klasanum sem skiptir máli fyrir verkefnið
+   er í raun constructorinn, enda gerir createList ekkert við
+   Tour hlutina nema búa þá til.
+*/
+// TODO implement comparable
+public class Tour{
 	private String name;
 	private String description;
 	private int seatsAvailable;
@@ -20,7 +27,7 @@ public class Tour /*implements Comparable */{
 	// private List<Guide> guides;
 	// private List<TourReview> reviews;
 	
-	// TODO taka af comments, initialize-a bara sem null
+	// TODO taka af comments
 	public Tour(String name, String description, int seatsAvailable, String date,
 			int duration, float rating, int numberOfRatings, int price, String destination, 
 			String departureLocation, String type){
@@ -41,22 +48,24 @@ public class Tour /*implements Comparable */{
 	}
 	
 	public void setGuides(){
-		// TODO later
+		// TODO implement þegar Guide class er tilbúinn.
 	}
 	
-	// TODO þegar Guide klasinn er kominn
-	public /*List<Guide>*/ void getGuides(){
-		//return this.guides;
+	// TODO implement þegar Guide class er tilbúinn.
+	/*public List<Guide> getGuides(){
+		return this.guides;
 	}
+	*/
 	
 	public void setReviews(){
-		// TODO later
+		// TODO implement þegar review class er tilbúinn.
 	}
 	
 	// TODO þegar Reviews stuffið er allt komið
-	public /*List<TourReview>*/ void getReviews(){
-		// return this.reviews;
+	/*public List<TourReview> void getReviews(){
+	     return this.reviews;
 	}
+	*/
 
 	
 	public boolean bookSeats(int bookedSeats){
