@@ -20,8 +20,10 @@ public class SearchManager {
 	
 	public void createList(){
 		
+		// Bý til lista, searchParams, sem mun geyma leitarupplýsingar frá notanda.
 		ArrayList<String> searchParams = new ArrayList<String>();
-		
+		// Sæki leitarupplýsingarnar og set í searchParams þ.a. þeir passi sem WHERE
+		// hlutinn í SQL-fyrirspurn.
 		searchParams.add("price>="+String.valueOf(this.view.getPriceLower()));
 		searchParams.add("price<="+String.valueOf(this.view.getPriceHigher()));
 		searchParams.add("Duration>="+String.valueOf(this.view.getDurationLow()));
@@ -34,18 +36,11 @@ public class SearchManager {
 		searchParams.add("Type='"+(this.view.getTourType()+"'"));
 		searchParams.add("Name LIKE '%"+(this.view.getTourName()+("%'")));
 
-		
 		String[][] dbData = DBManager.getTours(searchParams);
-		
-		// debug: g�gnin fr� DBManager
-		for(int i=0;i<dbData.length;i++){
-			for(int j=0;j<dbData[0].length;j++){
-				System.out.println(dbData[i][j]);
-			}
-		}
-		
+				
+		// hreinsa allt úr tours fyrir næstu leitarniðurstöður.
 		tours.clear(); 
-		// B�a til lista af tours
+		// Bý til lista af tours.
 		for(int i=0; i<dbData.length;i++){
 			tours.add(new Tour(dbData[i][0],dbData[i][1],Integer.valueOf(dbData[i][2]),dbData[i][3],
 				Integer.valueOf(dbData[i][4]),Float.valueOf(dbData[i][5]),Integer.valueOf(dbData[i][6]),
@@ -54,17 +49,19 @@ public class SearchManager {
 	}
 	
 	public void publishList(){
-		// TODO implement
+		// TODO implement þegar UI er tilbúið.
 	}
         
         public boolean isToursEmpty(){
             return false;
         }
 	
+	// bara fyrir testing til að athuga innihald tours.
 	public ArrayList<Tour> getTours(){
 		return this.tours;
 	}
 	
+	// listener fyrir search takkann.
 	class searchHandler implements ActionListener{
 		@Override
 		public void actionPerformed(ActionEvent e) {
@@ -72,8 +69,7 @@ public class SearchManager {
 			publishList();
 		}
 	}
-		
-	// Bara til a� testa
+	
 	public static void main(String[] args) {
 
 		Display view = new MockDisplay();
