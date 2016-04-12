@@ -1,11 +1,18 @@
 package hbv.view;
 
+import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.sql.Date;
+import java.util.ArrayList;
 
 import javax.swing.JButton;
 import javax.swing.JFrame;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
+
+import hbv.controller.SearchManager;
+import hbv.model.Tour;
+import hbv.model.noDataException;
 
 // Við bjuggum til nokkrar útgáfur af þessum klasa, sem allir implementa Display,
 // fyrir prófanir í staðinn fyrir að vera með settera fyrir breyturnar þar sem 
@@ -18,8 +25,8 @@ public class MockDisplay extends JFrame implements Display{
 	
 	private int priceLower;
 	private int priceHigher;
-	private int durationLow;
-	private int durationHigh;
+	private int durationLower;
+	private int durationHigher;
 	private Date dateLower;
 	private Date dateHigher;
 	private String tourType;
@@ -27,6 +34,7 @@ public class MockDisplay extends JFrame implements Display{
 	private String tourName;
 	private String destination;
 	private String departureLocation;
+	private String type;
 	
 	// Bý til display sem hefur bara einn takka.
 	// Takkinn varð svo óþarfur, en við gleymdum að taka hann út
@@ -49,8 +57,8 @@ public class MockDisplay extends JFrame implements Display{
 	private void initMockVars(){
 		priceLower = 4;
 		priceHigher = 100000;
-		durationLow = 3;
-		durationHigh = 20;
+		durationLower = 3;
+		durationHigher = 20;
 		dateLower = new Date(1); 
 		dateHigher = new Date(2017,5,5);
 		tourType = "Adventure";
@@ -58,12 +66,29 @@ public class MockDisplay extends JFrame implements Display{
 		tourName = "Snow";
 		destination = "Vatnajokull";
 		departureLocation = "Vik";
+		type = "Adventure";
+		
+		searchBtn.addActionListener(new ActionListener(){
+			public void actionPerformed(ActionEvent evt){
+				searchBtnActionPerformed(evt);
+			}
+		});
 	}
 	
-	public void addSearchListener(ActionListener action){
-		searchBtn.addActionListener(action);
-	}
 
+	private void searchBtnActionPerformed(java.awt.event.ActionEvent evt){
+		ArrayList<Tour> names = null;
+		try {
+			names = SearchManager.getSearchList(priceLower, priceHigher, durationLower, durationHigher, 
+					dateLower, dateHigher, minAvailableSeats, destination, departureLocation, type, tourName);
+		} catch (noDataException e) {
+			JOptionPane.showMessageDialog(null, "No search results");
+			e.printStackTrace();
+		}
+		for(Tour x: names){
+			System.out.println(x.getName());
+		}
+	}
 	public int getPriceLower() {
 		return priceLower;
 	}
@@ -73,11 +98,11 @@ public class MockDisplay extends JFrame implements Display{
 	}
 
 	public int getDurationLow() {
-		return durationLow;
+		return durationLower;
 	}
 
 	public int getDurationHigh() {
-		return durationHigh;
+		return durationHigher;
 	}
 
 	public Date getDateLower() {

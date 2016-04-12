@@ -1,5 +1,6 @@
 package hbv.model;
 
+import java.io.File;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
@@ -27,12 +28,11 @@ public class DBManager {
 	private static void setUp(){
 		try{
 			Class.forName("org.sqlite.JDBC");
-			conn = DriverManager.getConnection("JDBC:sqlite:C:\\Users"
-					+ "\\Notandi\\Documents\\Eclipse Workspace"
-					+ "\\hbv401g-2016v-3D\\src\\HBV.db");
+			File database = new File("src\\HBV.db");
+			String dbPath = database.getAbsolutePath();
+			conn = DriverManager.getConnection("JDBC:sqlite:"+dbPath);
 		}catch(ClassNotFoundException e){
 			e.printStackTrace();
-			System.out.println("no class or conn");
 		}catch(SQLException e){
 			e.printStackTrace();
 		}
@@ -41,40 +41,64 @@ public class DBManager {
 	// Loka öllum tengingum
 	private static void closeAll(){
 		try {
+			//pst.close();
+			//res.close();
 			conn.close();
-			res.close();
+			
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}
 	}
 	
 	// Þetta er eina fallið sem skiptir máli fyrir þessi skil.
-	public static String[][] getTours(ArrayList<String> where){
+	public static String[][] getTours(String table,ArrayList<String> searchParams) throws noDataException{
 		setUp();
 		
-		Statement stmtTours = null;
+		//Statement stmtTours = null;
 		Statement stmtRows = null;
 		// Fylli tours á eftir með gögnunum í resultsettinu sem fæst úr SQL-fyrirspurninni.
 		String[][] tours = null;
 		
-		// Set WHERE skilyrðin upp í streng.
-		String whereString = "";
-		for(String x: where){
-			whereString += x+" AND ";
-		}
-
-		// Losna við síðasta "AND" í strengnum.
-		whereString = whereString.substring(0, whereString.length()-5);
-
+		
 		try {
 			// Fæ fjölda raða sem munu koma út úr SQL-fyrirspurninni.
-			stmtRows = conn.createStatement();
-			res =stmtRows.executeQuery("SELECT COUNT(*) FROM Tours WHERE "+whereString+";");		
+			String prepared = "SELECT COUNT(*) FROM "+table;
+			if(searchParams.size()>0) prepared += " WHERE";
+			for(String searchParam: searchParams){
+				prepared += " ? AND";
+			}
+			
+			prepared = prepared.substring(0,prepared.length()-4);
+			prepared += ";";
+			System.out.println(prepared);
+			pst = conn.prepareStatement(prepared);
+			pst.setString(1, "price=17000");
+			/*
+			for(int i=0;i<searchParams.size();i++){
+				pst.setString(i+1, searchParams.get(i));
+			}*/
+			res = pst.executeQuery();
+			
+			
+			//stmtRows = conn.createStatement();
+			
+			
+			
+			
+			//pst.setString(1,rowCounter);
+			//pst.setString(2, searchParams);
+			//pst.setString(2, from);
+			//pst.setString(3, whereString);
+			//res = pst.executeQuery();
 			int rows = Integer.valueOf(res.getString(1));
+			System.out.println(rows);
+			//if(rows==0) throw new noDataException();
 
-			// Fæ gögnin sjálf.
-			stmtTours = conn.createStatement();
-			res = stmtTours.executeQuery("SELECT * FROM Tours WHERE "+whereString+";");
+			// Fæ gögnin sjálf.			
+			pst.setString(1,"*");
+			res = pst.executeQuery();
+			//stmtTours = conn.createStatement();
+			//res = stmtTours.executeQuery("SELECT * FROM Tours WHERE "+whereString+";");
 	
 			// Fæ fjölda dálka í leitarniðurstöðunum.
  			ResultSetMetaData rsmd = res.getMetaData();

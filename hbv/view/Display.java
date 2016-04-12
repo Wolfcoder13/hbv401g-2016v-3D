@@ -18,5 +18,4 @@ public interface Display {
 	public String getDepartureLocation();
 	
 	
-	public void addSearchListener(ActionListener action);
 }

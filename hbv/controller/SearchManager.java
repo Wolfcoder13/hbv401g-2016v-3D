@@ -3,21 +3,16 @@ package hbv.controller;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.ArrayList;
+import java.util.Date;
+
 import hbv.view.*;
 import hbv.model.*;
 
 // Þessi controller klasi inniheldur fallið sem skal prófa, þ.e. createList().
 public class SearchManager {
 
-	private Display view;
 	
-	private ArrayList<Tour> tours;
-	
-	public SearchManager(Display view){
-		this.view = view;
-		this.view.addSearchListener(new searchHandler());
-		this.tours = new ArrayList<Tour>();
-	}
+	private static ArrayList<Tour> tours = new ArrayList<Tour>();
 	
 	/*
 	 * Þetta er prófunarfallið. 
@@ -34,26 +29,39 @@ public class SearchManager {
 	 * Við gátum þó ekki breytt þessu núna þar sem það væri ekki í samræmi við skilin eins
 	 * og þau voru á sunnudag.
 	 */
-	public void createList(){
+	// Þetta verður kallað á með search takkanum.
+	public static ArrayList<Tour> getSearchList(int priceLower,int priceHigher,int durationLower,int durationHigher,
+			Date dateLower, Date dateHigher,int minAvailableSeats,String destination,String departure,
+			String type, String name) throws noDataException{
 		
 		// Bý til lista, searchParams, sem mun geyma leitarskilyrðin frá notanda.
 		ArrayList<String> searchParams = new ArrayList<String>();
 		// Sæki leitarskilyrðin frá viewinu og set í searchParams þ.a. þeir passi
 		// sem WHERE hlutinn í SQL-fyrirspurn.
-		searchParams.add("price>="+String.valueOf(this.view.getPriceLower()));
-		searchParams.add("price<="+String.valueOf(this.view.getPriceHigher()));
-		searchParams.add("Duration>="+String.valueOf(this.view.getDurationLow()));
-		searchParams.add("Duration<="+String.valueOf(this.view.getDurationHigh()));
-		searchParams.add("Date>='"+String.valueOf(this.view.getDateLower())+"'");
-		searchParams.add("Date<='"+String.valueOf(this.view.getDateHigher())+"'");
-		searchParams.add("SeatsAvailable>="+String.valueOf(this.view.getMinAvailableSeats()));
-		searchParams.add("Destination='"+(this.view.getDestination()+"'"));
-		searchParams.add("Departure='"+(this.view.getDepartureLocation()+"'"));
-		searchParams.add("Type='"+(this.view.getTourType()+"'"));
-		searchParams.add("Name LIKE '%"+(this.view.getTourName()+("%'")));
+		searchParams.add("price>="+String.valueOf(priceLower));
+		//searchParams.add("price<="+String.valueOf(priceHigher));
+		//searchParams.add("Duration>="+String.valueOf(durationLower));
+		//searchParams.add("Duration<="+String.valueOf(durationHigher));
+		//searchParams.add("Date>='"+String.valueOf(dateLower)+"'");
+		//searchParams.add("Date<='"+String.valueOf(dateHigher)+"'");
+		//searchParams.add("SeatsAvailable>="+String.valueOf(minAvailableSeats));
+		//searchParams.add("Destination='"+destination+"'");
+		//searchParams.add("Departure='"+departure+"'");
+		//searchParams.add("Type='"+type+"'");
+		//searchParams.add("Name LIKE '%"+name+("%'"));
 
-		// Fæ gögnin frá DBManager miðað við leitarskilyrðin.
-		String[][] dbData = DBManager.getTours(searchParams);
+		
+		String whereString = "WHERE Price>=? AND Price>=? AND Duration>=? AND Duration<=?"
+				+ " AND Date>=? AND Date<=? AND SeatsAvailable>=? AND Destination=? AND "
+				+ "Departure=? AND Type=? AND NAME LIKE ?;";
+		for(String x: searchParams){
+			whereString += x+" AND ";
+		}
+		//Losna við síðasta "AND" í strengnum.
+		whereString = whereString.substring(0, whereString.length()-5);
+			
+		// Bý til lista af Tour hlutum miðað við leitarskilyrðin.
+		String[][] dbData = DBManager.getTours("Tours",searchParams);
 				
 		// hreinsa gömlu leitarniðurstöðurnar úr tours (ef einhverjar eru).
 		tours.clear();
@@ -63,43 +71,34 @@ public class SearchManager {
 				Integer.valueOf(dbData[i][4]),Float.valueOf(dbData[i][5]),Integer.valueOf(dbData[i][6]),
 				Integer.valueOf(dbData[i][7]),dbData[i][8],dbData[i][9],dbData[i][10]));
 		}
+		
+		return tours;
+		
 	}
 	
-	// Verður notað til að birta tiltekin lykilgögn úr tours-listanum, sem lista á UI, sem 
-	// notandi getur svo smellt á til að skoða nánar.
-	public void publishList(){
-		// TODO implement þegar UI er tilbúið.
-	}
+
+
+	
     
 	// Bara fyrir testing.
-    public boolean isToursEmpty(){
+    public static boolean isToursEmpty(){
         return false;
     }
 	
 	// bara fyrir testing til að athuga innihald tours.
-	public ArrayList<Tour> getTours(){
-		return this.tours;
+	public static ArrayList<Tour> getTours(){
+		return tours;
 	}
 	
-	// Handler fyrir search takkann.
-	class searchHandler implements ActionListener{
-		@Override
-		public void actionPerformed(ActionEvent e) {
-			createList();
-			publishList();
-		}
-	}
 	
-	@SuppressWarnings("unused")
+
 	public static void main(String[] args) {
 
 		// Bý til instance af mockUI-inu sem controllerinn fær svo
 		// til að sækja upplýsingar frá.
 		Display view = new MockDisplay();
-		SearchManager controller = new SearchManager(view);
-		
 		((MockDisplay)view).setVisible(true);
-		
+
 	}
 
 }

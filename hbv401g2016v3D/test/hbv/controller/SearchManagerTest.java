@@ -3,7 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package hbv.controller;
+/*package hbv.controller;
 
 import hbv.view.MockDisplay;
 import hbv.view.MockDisplay2;
@@ -19,7 +19,7 @@ import static org.junit.Assert.*;
  *
  * @author AndriValur
  */
-public class SearchManagerTest {
+/*public class SearchManagerTest {
     
     
     
@@ -40,7 +40,7 @@ public class SearchManagerTest {
     /**
      * Test of createList method, of class SearchManager.
      */
-    @Test
+ /*   @Test
     public void testCreateList() {
         MockDisplay view = new MockDisplay();
         SearchManager instance = new SearchManager(view);
@@ -69,4 +69,4 @@ public class SearchManagerTest {
     }
 
     
-}
+}*/
