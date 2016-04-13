@@ -7,8 +7,8 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
-import java.sql.Statement;
-import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.NoSuchElementException;
 
 /* Þessi class er ekki mockObject þar sem við vorum byrjaðir
    á honum fyrir. Okkur fannst því óþarfi að að vera gera annan
@@ -25,155 +25,106 @@ public class DBManager {
 	private static ResultSet res = null;
 	
 	// Bý til tengingu við sqlite gagnagrunninn
-	private static void setUp(){
-		try{
-			Class.forName("org.sqlite.JDBC");
-			File database = new File("src\\HBV.db");
-			String dbPath = database.getAbsolutePath();
-			conn = DriverManager.getConnection("JDBC:sqlite:"+dbPath);
-		}catch(ClassNotFoundException e){
-			e.printStackTrace();
-		}catch(SQLException e){
-			e.printStackTrace();
-		}
+	private static void setUp() throws SQLException,ClassNotFoundException{
+		Class.forName("org.sqlite.JDBC");
+		File database = new File("src\\HBV.db");
+		String dbPath = database.getAbsolutePath();
+		conn = DriverManager.getConnection("JDBC:sqlite:"+dbPath);
 	}
 	
 	// Loka öllum tengingum
 	private static void closeAll(){
 		try {
-			//pst.close();
-			//res.close();
-			conn.close();
-			
+			pst.close();
+			res.close();
+			conn.close();	
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}
 	}
 	
-	// Þetta er eina fallið sem skiptir máli fyrir þessi skil.
-	public static String[][] getTours(String table,ArrayList<String> searchParams) throws noDataException{
-		setUp();
+	public static String[][] getData(String columns, String table, HashMap<String,Object> whereParams) throws NoSuchElementException{
 		
-		//Statement stmtTours = null;
-		Statement stmtRows = null;
-		// Fylli tours á eftir með gögnunum í resultsettinu sem fæst úr SQL-fyrirspurninni.
-		String[][] tours = null;
-		
+		String prepWhere = buildWhereString(whereParams);
+		String rowCounter = "SELECT COUNT(*) FROM "+table;
+		String search = "SELECT "+columns+" FROM "+table;
+		// data mun innihalda gögnin sem fást úr SQL-fyrirspurninni og verður þá skilagildi fallsins.
+		String[][] data = null;
 		
 		try {
-			// Fæ fjölda raða sem munu koma út úr SQL-fyrirspurninni.
-			String prepared = "SELECT COUNT(*) FROM "+table;
-			if(searchParams.size()>0) prepared += " WHERE";
-			for(String searchParam: searchParams){
-				prepared += " ? AND";
-			}
-			
-			prepared = prepared.substring(0,prepared.length()-4);
-			prepared += ";";
-			System.out.println(prepared);
-			pst = conn.prepareStatement(prepared);
-			pst.setString(1, "price=17000");
-			/*
-			for(int i=0;i<searchParams.size();i++){
-				pst.setString(i+1, searchParams.get(i));
-			}*/
+			setUp();
+			// Sækjum fjölda raða sem munu koma út úr SQL-fyrirspurninni.
+			pst = conn.prepareStatement(rowCounter+prepWhere.toString());
+			bindParams(whereParams);
 			res = pst.executeQuery();
-			
-			
-			//stmtRows = conn.createStatement();
-			
-			
-			
-			
-			//pst.setString(1,rowCounter);
-			//pst.setString(2, searchParams);
-			//pst.setString(2, from);
-			//pst.setString(3, whereString);
-			//res = pst.executeQuery();
+			// Fáum fjölda raða í leitarniðurstöðunum til að stilla fjölda raða í data fylkinu á eftir.
 			int rows = Integer.valueOf(res.getString(1));
-			System.out.println(rows);
-			//if(rows==0) throw new noDataException();
+			// Ef engar raðir eru í res, þá hendum við exception í staðinn fyrir að skila tómu fylki.
+			if(rows==0) throw new NoSuchElementException("No matching data found.");
 
-			// Fæ gögnin sjálf.			
-			pst.setString(1,"*");
+			// Sækjum gögnin sjálf.			
+			pst = conn.prepareStatement(search+prepWhere.toString());
+			bindParams(whereParams);
 			res = pst.executeQuery();
-			//stmtTours = conn.createStatement();
-			//res = stmtTours.executeQuery("SELECT * FROM Tours WHERE "+whereString+";");
-	
-			// Fæ fjölda dálka í leitarniðurstöðunum.
+
+			// Fáum fjölda dálka í leitarniðurstöðunum til að geta upphafsstillt data fylkið.
  			ResultSetMetaData rsmd = res.getMetaData();
-			int cols = rsmd.getColumnCount();	
+			int cols = rsmd.getColumnCount();
+			System.out.println("cols: "+cols);
 			
-			// Þurfti að vita víddirnar á resultSet til að geta upphafsstillt tours hér.
-			tours = new String[rows][cols];
-			// Færi svo gögnin í óháða 2D fylkið tours, sem verður skilagildi fallsins.
+			// Færum gögnin í res yfir í data fylkið.
+			data = new String[rows][cols];
 			int i = 0;
 			while(res.next()){
 				for(int j = 0; j<cols;j++){
-					tours[i][j] = res.getString(j+1);
+					data[i][j] = res.getString(j+1);
 				}
 				i++;
 			}
 		} catch (SQLException e) {
 			e.printStackTrace();
+		} catch (ClassNotFoundException e) {
+			e.printStackTrace();
 		} finally{
 			closeAll();
 		}
-		return tours;
+		return data;
 	}
 	
-	// TODO klára
-	public static String[] getTourReviews(){
-		String[] tourReviews = null;
-		return tourReviews;
-	}
-	
-	// TODO klára
-	public static String[][] getGuides(){
-		String[][] guides = null;
-		return guides;
-	}
-	
-	// TODO klára
-	public static String[] getGuideReviews(){
-		String[] guideReviews = null;
-		return guideReviews;
-	}
-	
-	public static void updateSeats(String tourName,int newSeats){
-		setUp();
+	private static String buildWhereString(HashMap<String,Object> whereParams){
+		StringBuilder prepWhere = new StringBuilder(" WHERE ");
+		for(String key: whereParams.keySet()){
+			prepWhere.append(key+"? AND ");
+		}
+		prepWhere.delete(prepWhere.length()-5, prepWhere.length());
+		prepWhere.append(';');
 		
-		try {
-			pst = conn.prepareStatement("UPDATE Tours SET SeatsAvailable=? "
-					+ "WHERE name=?");
-			pst.setString(1, String.valueOf(newSeats));
-			pst.setString(2, tourName);
-			pst.execute();
-		} catch (SQLException e) {
-			e.printStackTrace();
-		} finally{ 
-			closeAll();	
+		return prepWhere.toString();
+	}
+	
+	private static void bindParams(HashMap<String,Object> searchParams) throws SQLException{
+		int index = 1;
+		for(String key: searchParams.keySet()){
+			if(key.contains("LIKE")){
+				pst.setString(index, "%"+searchParams.get(key)+"%");
+			}else{
+				pst.setString(index, String.valueOf(searchParams.get(key)));
+			}
+			index++;
 		}
 	}
-	
-	public static void updateRating(String tourName, float newRating, int numberOfRatings){
-		setUp();
+
+	public static void updateTable(String table, String ColName, String newValue, HashMap<String,Object> whereParams){
 		try {
-			pst = conn.prepareStatement("UPDATE Tours SET Rating=? "
-					+ "WHERE name=?");
-			pst.setString(1, String.valueOf(newRating));
-			pst.setString(2, tourName);
-			pst.execute();
+			setUp();
 			
-			pst = conn.prepareStatement("UPDATE Tours SET NumberOfRatings=? "
-					+ "WHERE name=?");
-			pst.setString(1, String.valueOf(numberOfRatings));
-			pst.setString(2, tourName);
-			pst.execute();
-		} catch (SQLException e) {
+			String prepared = "UPDATE "+table+" SET "+ColName+"="+newValue+buildWhereString(whereParams);
+			pst = conn.prepareStatement(prepared);
+			bindParams(whereParams);
+			pst.executeUpdate();
+			
+		} catch (ClassNotFoundException | SQLException e) {
 			e.printStackTrace();
-		} finally{
-			closeAll();	
 		}
 	}
 }

@@ -68,26 +68,14 @@ public class Tour{
 	*/
 
 	
-	public boolean bookSeats(int bookedSeats){
-		if(this.seatsAvailable>=bookedSeats){
-			this.seatsAvailable -= bookedSeats;
-			DBManager.updateSeats(this.name, this.seatsAvailable);
-			return true;
-		}else{
-			return false;
-		}
+	public void bookSeats(int bookedSeats){
+		this.seatsAvailable -= bookedSeats;
 	}
 	
-	public void updateRating(int rating){
-		System.out.println("old inner rating: "+this.rating);
-		int expand = (int)(this.rating*numberOfRatings);
-		System.out.println("expand: "+expand);
-		int newExpand = expand+rating;
-		System.out.println("newExpand: "+newExpand);
-		numberOfRatings++;
-		this.rating = (float)newExpand/numberOfRatings;
-		System.out.println("new inner rating: "+this.rating);
-		DBManager.updateRating(this.name, this.rating, this.numberOfRatings);
+	public void updateRating(float rating, int numberOfRatings){
+		this.numberOfRatings = numberOfRatings;
+		this.rating = rating;
+		
 	}
 	
 	public String getName(){
@@ -105,8 +93,9 @@ public class Tour{
 	public String getDate(){
 		return this.date;
 	}
-	public String getRating(){
-		return String.format(Locale.ENGLISH,"%.1f", this.rating);
+	public float getRating(){
+		String tmp = String.format(Locale.ENGLISH,"%.1f", this.rating);
+		return Float.parseFloat(tmp);
 	}
 	public String getLocation(){
 		return this.destination;
@@ -124,9 +113,14 @@ public class Tour{
 	}
 	
 	public String getDepartureLocation(){
-		return this.getDepartureLocation();
+		return this.departureLocation;
+	}
+
+	public String getType() {
+		return this.type;
 	}
 		
+	
 	/*
 	@Override
 	public int compareTo(Object arg0) {

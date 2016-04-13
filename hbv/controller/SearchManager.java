@@ -1,9 +1,11 @@
 package hbv.controller;
 
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
+
 import java.util.ArrayList;
-import java.util.Date;
+import java.util.HashMap;
+import java.util.NoSuchElementException;
+import java.sql.Date;
+
 
 import hbv.view.*;
 import hbv.model.*;
@@ -30,39 +32,27 @@ public class SearchManager {
 	 * og þau voru á sunnudag.
 	 */
 	// Þetta verður kallað á með search takkanum.
-	public static ArrayList<Tour> getSearchList(int priceLower,int priceHigher,int durationLower,int durationHigher,
+	public static ArrayList<Tour> createList(int priceLower,int priceHigher,int durationLower,int durationHigher,
 			Date dateLower, Date dateHigher,int minAvailableSeats,String destination,String departure,
-			String type, String name) throws noDataException{
+			String type, String name) throws NoSuchElementException{
 		
 		// Bý til lista, searchParams, sem mun geyma leitarskilyrðin frá notanda.
-		ArrayList<String> searchParams = new ArrayList<String>();
-		// Sæki leitarskilyrðin frá viewinu og set í searchParams þ.a. þeir passi
-		// sem WHERE hlutinn í SQL-fyrirspurn.
-		searchParams.add("price>="+String.valueOf(priceLower));
-		//searchParams.add("price<="+String.valueOf(priceHigher));
-		//searchParams.add("Duration>="+String.valueOf(durationLower));
-		//searchParams.add("Duration<="+String.valueOf(durationHigher));
-		//searchParams.add("Date>='"+String.valueOf(dateLower)+"'");
-		//searchParams.add("Date<='"+String.valueOf(dateHigher)+"'");
-		//searchParams.add("SeatsAvailable>="+String.valueOf(minAvailableSeats));
-		//searchParams.add("Destination='"+destination+"'");
-		//searchParams.add("Departure='"+departure+"'");
-		//searchParams.add("Type='"+type+"'");
-		//searchParams.add("Name LIKE '%"+name+("%'"));
-
+		HashMap<String,Object> searchParams = new HashMap<String,Object>();
+		searchParams.put("Price>=", priceLower);
+		searchParams.put("Price<=", priceHigher);
+		searchParams.put("Duration>=", durationLower);
+		searchParams.put("Duration<=", durationHigher);
+		searchParams.put("Date>=", dateLower);
+		searchParams.put("Date<=", dateHigher);
+		searchParams.put("SeatsAvailable>=", minAvailableSeats);
+		searchParams.put("Destination=", destination);
+		searchParams.put("Departure=", departure);
+		searchParams.put("Type=", type);
+		searchParams.put("Name LIKE ", name);
 		
-		String whereString = "WHERE Price>=? AND Price>=? AND Duration>=? AND Duration<=?"
-				+ " AND Date>=? AND Date<=? AND SeatsAvailable>=? AND Destination=? AND "
-				+ "Departure=? AND Type=? AND NAME LIKE ?;";
-		for(String x: searchParams){
-			whereString += x+" AND ";
-		}
-		//Losna við síðasta "AND" í strengnum.
-		whereString = whereString.substring(0, whereString.length()-5);
-			
 		// Bý til lista af Tour hlutum miðað við leitarskilyrðin.
-		String[][] dbData = DBManager.getTours("Tours",searchParams);
-				
+		String[][] dbData = DBManager.getData("*","Tours",searchParams);
+		
 		// hreinsa gömlu leitarniðurstöðurnar úr tours (ef einhverjar eru).
 		tours.clear();
 		// Bý til Tour-hluti í samræmi við leitarniðurstöður og set í listann tours.
@@ -77,6 +67,53 @@ public class SearchManager {
 	}
 	
 
+	public static void bookTourSeats(String tourName, int bookedSeats) throws NoSuchElementException, IllegalArgumentException{
+
+		// Byrjum að athuga núverandi sætafjölda.
+		HashMap<String,Object> whereParams = new HashMap<String,Object>();
+		whereParams.put("Name=", tourName);
+		String[][] seatData = DBManager.getData("SeatsAvailable", "Tours", whereParams);
+		int seats = Integer.parseInt(seatData[0][0]);
+		if(bookedSeats<0) throw new IllegalArgumentException("Second input parameter must be positive.");
+		
+		// Lækkum sætafjöldann til að tákna að bókun hafi átt sér stað að því gefnu að nægilegt sætamagn sé í boði.
+		if(seats>bookedSeats){
+			DBManager.updateTable("Tours", "SeatsAvailable", String.valueOf(seats-bookedSeats), whereParams);
+		} else throw new IllegalArgumentException("Too few seats available.");
+		
+		// Ef að túrinn er í núverandi tours lista, update-um við hann líka.
+		for(Tour tour: tours){
+			if(tour.getName()==tourName){
+				tour.bookSeats(bookedSeats);
+			}
+		}
+	}
+	
+	public static void updateRating(String tourName, int newRating) throws NoSuchElementException, IllegalArgumentException{
+
+		// Sækjum fjölda einkunnagjafa og núverandi einkunn.
+		HashMap<String,Object> whereParams = new HashMap<String,Object>();
+		whereParams.put("Name=", tourName);
+		String[][] RatingData = DBManager.getData("NumberOfRatings, Rating", "Tours", whereParams);
+		int amountOfRatings = Integer.parseInt(RatingData[0][0]);
+		float oldRating = Float.parseFloat(RatingData[0][1]);
+		
+		// Reiknum út nýju einkunnina
+		int expanded = (int)(oldRating*amountOfRatings)+newRating;
+		amountOfRatings++;
+		float rating = (float)expanded/amountOfRatings;
+		
+		// Skrifum fjölda einkunna ásamt nýju einkunninni í gagnagrunninn.
+		DBManager.updateTable("Tours", "NumberOfRatings", String.valueOf(amountOfRatings), whereParams);
+		DBManager.updateTable("Tours", "Rating", String.valueOf(rating), whereParams);
+		
+		// Uppfærum túrinn ef hann er í núverandi lista.
+		for(Tour tour: tours){
+			if(tour.getName()==tourName){
+				tour.updateRating(rating, amountOfRatings);
+			}
+		}
+	}
 
 	
     
@@ -97,6 +134,7 @@ public class SearchManager {
 		// Bý til instance af mockUI-inu sem controllerinn fær svo
 		// til að sækja upplýsingar frá.
 		Display view = new MockDisplay();
+		((MockDisplay)view).setLocationRelativeTo(null);
 		((MockDisplay)view).setVisible(true);
 
 	}

@@ -4,6 +4,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.sql.Date;
 import java.util.ArrayList;
+import java.util.NoSuchElementException;
 
 import javax.swing.JButton;
 import javax.swing.JFrame;
@@ -12,7 +13,6 @@ import javax.swing.JPanel;
 
 import hbv.controller.SearchManager;
 import hbv.model.Tour;
-import hbv.model.noDataException;
 
 // Við bjuggum til nokkrar útgáfur af þessum klasa, sem allir implementa Display,
 // fyrir prófanir í staðinn fyrir að vera með settera fyrir breyturnar þar sem 
@@ -53,14 +53,13 @@ public class MockDisplay extends JFrame implements Display{
 	}
 	
 	// stilli prufubreytur sem verða notaðar í prófun.
-	@SuppressWarnings("deprecation")
 	private void initMockVars(){
 		priceLower = 4;
 		priceHigher = 100000;
 		durationLower = 3;
 		durationHigher = 20;
-		dateLower = new Date(1); 
-		dateHigher = new Date(2017,5,5);
+		dateLower = java.sql.Date.valueOf("2016-04-12");
+		dateHigher = java.sql.Date.valueOf("2016-10-22");
 		tourType = "Adventure";
 		minAvailableSeats = 6;
 		tourName = "Snow";
@@ -79,15 +78,25 @@ public class MockDisplay extends JFrame implements Display{
 	private void searchBtnActionPerformed(java.awt.event.ActionEvent evt){
 		ArrayList<Tour> names = null;
 		try {
-			names = SearchManager.getSearchList(priceLower, priceHigher, durationLower, durationHigher, 
+			//DEBUGGING STUFF
+			names = SearchManager.createList(priceLower, priceHigher, durationLower, durationHigher, 
 					dateLower, dateHigher, minAvailableSeats, destination, departureLocation, type, tourName);
-		} catch (noDataException e) {
+			System.out.println("Fyrir: "+names.get(0).getName()+" :: "+names.get(0).getSeatsAvailable());
+			SearchManager.bookTourSeats(names.get(0).getName(), 5);
+			System.out.println("Eftir: "+names.get(0).getName()+" :: "+names.get(0).getSeatsAvailable());
+			
+			System.out.println("Fyrir: "+names.get(0).getName()+" :: "+names.get(0).getRating());
+			SearchManager.updateRating(names.get(0).getName(), 1);
+			System.out.println("Eftir: "+names.get(0).getName()+" :: "+names.get(0).getRating());
+			
+			for(Tour x: names){
+				System.out.println("TourName: "+x.getName());
+			}
+		} catch (NoSuchElementException e) {
 			JOptionPane.showMessageDialog(null, "No search results");
-			e.printStackTrace();
 		}
-		for(Tour x: names){
-			System.out.println(x.getName());
-		}
+		
+
 	}
 	public int getPriceLower() {
 		return priceLower;
@@ -105,11 +114,10 @@ public class MockDisplay extends JFrame implements Display{
 		return durationHigher;
 	}
 
-	public Date getDateLower() {
+	public Date getDateLower(){
 		return dateLower;
 	}
-
-	public Date getDateHigher() {
+	public Date getDateHigher(){
 		return dateHigher;
 	}
 
