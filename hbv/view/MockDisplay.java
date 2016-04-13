@@ -43,7 +43,7 @@ public class MockDisplay extends JFrame implements Display{
 	public MockDisplay(){
 		this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		this.setSize(400,200);
-		
+		this.setLocationRelativeTo(null);
 		searchBtn = new JButton("Search");
 		panel = new JPanel();
 		panel.add(searchBtn);

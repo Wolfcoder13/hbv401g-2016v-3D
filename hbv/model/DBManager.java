@@ -10,14 +10,7 @@ import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.NoSuchElementException;
 
-/* Þessi class er ekki mockObject þar sem við vorum byrjaðir
-   á honum fyrir. Okkur fannst því óþarfi að að vera gera annan
-   klasa þar sem þessi var alveg tilbúinn til notkunar fyrir þetta 
-   verkefni.
 
-   Eina fallið í klasanum sem skiptir máli fyrir verkefnið
-   er í raun getTours().
-*/
 public class DBManager {
 
 	private static Connection conn = null;
@@ -43,6 +36,9 @@ public class DBManager {
 		}
 	}
 	
+	/*
+	 * Sendir SELECT fyrirspurn til gagnagrunnsins og skilar niðurstöðunum í 2D fylki.
+	 */
 	public static String[][] getData(String columns, String table, HashMap<String,Object> whereParams) throws NoSuchElementException{
 		
 		String prepWhere = buildWhereString(whereParams);
@@ -55,22 +51,21 @@ public class DBManager {
 			setUp();
 			// Sækjum fjölda raða sem munu koma út úr SQL-fyrirspurninni.
 			pst = conn.prepareStatement(rowCounter+prepWhere.toString());
-			bindParams(whereParams);
+			bindParams(1,whereParams);
 			res = pst.executeQuery();
 			// Fáum fjölda raða í leitarniðurstöðunum til að stilla fjölda raða í data fylkinu á eftir.
 			int rows = Integer.valueOf(res.getString(1));
 			// Ef engar raðir eru í res, þá hendum við exception í staðinn fyrir að skila tómu fylki.
-			if(rows==0) throw new NoSuchElementException("No matching data found.");
+			if(rows==0) throw new NoSuchElementException("No match found in "+table+".");
 
 			// Sækjum gögnin sjálf.			
 			pst = conn.prepareStatement(search+prepWhere.toString());
-			bindParams(whereParams);
+			bindParams(1,whereParams);
 			res = pst.executeQuery();
 
 			// Fáum fjölda dálka í leitarniðurstöðunum til að geta upphafsstillt data fylkið.
  			ResultSetMetaData rsmd = res.getMetaData();
 			int cols = rsmd.getColumnCount();
-			System.out.println("cols: "+cols);
 			
 			// Færum gögnin í res yfir í data fylkið.
 			data = new String[rows][cols];
@@ -81,9 +76,7 @@ public class DBManager {
 				}
 				i++;
 			}
-		} catch (SQLException e) {
-			e.printStackTrace();
-		} catch (ClassNotFoundException e) {
+		} catch (ClassNotFoundException | SQLException e) {
 			e.printStackTrace();
 		} finally{
 			closeAll();
@@ -91,19 +84,47 @@ public class DBManager {
 		return data;
 	}
 	
+	// Sendir UPDATE statement til gagnagrunnsins.
+	public static void updateTable(String table, String ColName, String newValue, HashMap<String,Object> whereParams){
+		try {
+			setUp();
+			
+			String prepared = "UPDATE "+table+" SET "+ColName+"=?"+buildWhereString(whereParams);
+			pst = conn.prepareStatement(prepared);
+			pst.setString(1, newValue);
+			bindParams(2,whereParams);
+			pst.executeUpdate();
+			
+		} catch (ClassNotFoundException | SQLException e) {
+			e.printStackTrace();
+		} finally{
+			closeAll();
+		}
+	}
+	
+	/*
+	 * Búum til streng fyrir WHERE-hlutann af SQL-fyrirspurn
+	 * sem er á formi sem preparedStatement getur notað, þ.e. með '?' sem
+	 * placeholders fyrir search parametrana.
+	 */
 	private static String buildWhereString(HashMap<String,Object> whereParams){
 		StringBuilder prepWhere = new StringBuilder(" WHERE ");
 		for(String key: whereParams.keySet()){
 			prepWhere.append(key+"? AND ");
 		}
+		// Losna við síðasta 'AND'.
 		prepWhere.delete(prepWhere.length()-5, prepWhere.length());
 		prepWhere.append(';');
 		
 		return prepWhere.toString();
 	}
 	
-	private static void bindParams(HashMap<String,Object> searchParams) throws SQLException{
-		int index = 1;
+	/*
+	 * Stingum inn search parametrunum í placeholder-ana í
+	 * prepared statementinu. index segir til um hvaða placeholder 
+	 * er byrjað á.
+	 */
+	private static void bindParams(int index,HashMap<String,Object> searchParams) throws SQLException{
 		for(String key: searchParams.keySet()){
 			if(key.contains("LIKE")){
 				pst.setString(index, "%"+searchParams.get(key)+"%");
@@ -114,17 +135,6 @@ public class DBManager {
 		}
 	}
 
-	public static void updateTable(String table, String ColName, String newValue, HashMap<String,Object> whereParams){
-		try {
-			setUp();
-			
-			String prepared = "UPDATE "+table+" SET "+ColName+"="+newValue+buildWhereString(whereParams);
-			pst = conn.prepareStatement(prepared);
-			bindParams(whereParams);
-			pst.executeUpdate();
-			
-		} catch (ClassNotFoundException | SQLException e) {
-			e.printStackTrace();
-		}
-	}
+	
+	//TODO insert statement eða sleppa?
 }
