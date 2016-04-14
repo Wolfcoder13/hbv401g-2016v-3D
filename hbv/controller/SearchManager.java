@@ -4,7 +4,7 @@ package hbv.controller;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.NoSuchElementException;
-import java.sql.Date;
+import java.util.Date;
 
 
 import hbv.view.*;
@@ -19,19 +19,20 @@ public class SearchManager {
 			Date dateLower, Date dateHigher,int minAvailableSeats,String destination,String departure,
 			String type, String name) throws NoSuchElementException{
 		
-		// Bý til lista, searchParams, sem mun geyma leitarskilyrðin frá notanda.
+		// Bý til töflu, searchParams, sem mun geyma leitarskilyrðin frá notanda.
 		HashMap<String,Object> searchParams = new HashMap<String,Object>();
-		searchParams.put("Price>=", priceLower);
-		searchParams.put("Price<=", priceHigher);
-		searchParams.put("Duration>=", durationLower);
-		searchParams.put("Duration<=", durationHigher);
-		searchParams.put("Date>=", dateLower);
-		searchParams.put("Date<=", dateHigher);
-		searchParams.put("SeatsAvailable>=", minAvailableSeats);
-		searchParams.put("Destination=", destination);
-		searchParams.put("Departure=", departure);
-		searchParams.put("Type=", type);
-		searchParams.put("Name LIKE ", name);
+		if(priceLower!=-1) searchParams.put("Price>=", priceLower);
+		if(priceHigher!=-1) searchParams.put("Price<=", priceHigher);
+		if(durationLower!=-1) searchParams.put("Duration>=", durationLower);
+		if(durationHigher!=-1) searchParams.put("Duration<=", durationHigher);
+		if(dateLower!=null) searchParams.put("Date>=", new java.sql.Date(dateLower.getTime()));
+		if(dateHigher!=null) searchParams.put("Date<=", new java.sql.Date(dateHigher.getTime()));
+		if(minAvailableSeats!=-1) searchParams.put("SeatsAvailable>=", minAvailableSeats);
+		if(!destination.equals("")) searchParams.put("Destination LIKE ", destination);
+		if(!departure.equals("")) searchParams.put("Departure LIKE ", departure);
+		if(!type.equals("")) searchParams.put("Type=", type);
+		if(!name.equals("")) searchParams.put("Name LIKE ", name);
+		
 		
 		// Bý til lista af Tour hlutum miðað við leitarskilyrðin.
 		String[][] dbData = DBManager.getData("*","Tours",searchParams);
@@ -72,6 +73,7 @@ public class SearchManager {
 	
 	public static void updateRating(String tourName, int newRating) throws NoSuchElementException, IllegalArgumentException{
 
+		if(newRating<0 || newRating>5) throw new IllegalArgumentException("Rating is on scale from 0 to 5");
 		// Sækjum fjölda einkunnagjafa og núverandi einkunn.
 		HashMap<String,Object> whereParams = new HashMap<String,Object>();
 		whereParams.put("Name=", tourName);
@@ -114,7 +116,6 @@ public class SearchManager {
 
 		// TODO main fara eitthvert annað, líklega display. controllerinn á ekki að eiga eintak af view.
 		Display view = new MockDisplay();
-		((MockDisplay)view).setVisible(true);
 
 	}
 
