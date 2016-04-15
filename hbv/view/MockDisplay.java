@@ -379,7 +379,6 @@ public class MockDisplay extends JFrame implements Display{
 				descTxt.setText(tour.getDescription());
 			}
 		}
-		
 	}
 	
 	private void searchBtnActionPerformed(ActionEvent evt){
@@ -387,7 +386,6 @@ public class MockDisplay extends JFrame implements Display{
 		tourTable.setRowSelectionAllowed(true);
 		nameRenderer.setBackground(Color.WHITE);
 		ratingRenderer.setBackground(Color.WHITE);
-		
 		
 		String priceLowStr = String.valueOf((priceFromCom.getSelectedItem()));
 		int priceLow;
@@ -417,7 +415,6 @@ public class MockDisplay extends JFrame implements Display{
 			}
 		}
 
-		
 		Date dateFrom = calendarFrom.getDate();
 		Date dateTo = calendarTo.getDate();
 		String destination = destinationTxt.getText();
@@ -427,8 +424,8 @@ public class MockDisplay extends JFrame implements Display{
 			tours = SearchManager.createList(priceLow, priceHigh, durationLow, durationHigh, dateFrom, dateTo, minSeats, destination, departure, tourType, tourName);
 
 			scroller.setVisible(true);
-			for(Tour x: tours){
-				tableModel.addRow(new Object[]{x.getName(),x.getRating()});
+			for(Tour tour: tours){
+				tableModel.addRow(new Object[]{tour.getName(),tour.getRating()});
 			}
 			
 		} catch (NoSuchElementException e) {
@@ -437,6 +434,7 @@ public class MockDisplay extends JFrame implements Display{
 			ratingRenderer.setBackground(this.getContentPane().getBackground());
 			tableModel.addRow(new String[]{"No match found."});
 			tourTable.setRowSelectionAllowed(false);
+			scroller.setVisible(true);
 		}
 	}
 	

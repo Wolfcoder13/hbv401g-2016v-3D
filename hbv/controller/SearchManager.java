@@ -97,8 +97,6 @@ public class SearchManager {
 			}
 		}
 	}
-
-	
     
 	// Bara fyrir testing.
     public static boolean isToursEmpty(){
@@ -110,13 +108,9 @@ public class SearchManager {
 		return tours;
 	}
 	
-	
-
 	public static void main(String[] args) {
 
 		// TODO main fara eitthvert annað, líklega display. controllerinn á ekki að eiga eintak af view.
 		Display view = new MockDisplay();
-
 	}
-
 }
