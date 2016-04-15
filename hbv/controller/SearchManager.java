@@ -1,6 +1,5 @@
 package hbv.controller;
 
-
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.NoSuchElementException;
@@ -9,6 +8,8 @@ import java.util.Date;
 
 import hbv.view.*;
 import hbv.model.*;
+import java.util.Collections;
+import java.util.Comparator;
 
 public class SearchManager {
 
@@ -19,7 +20,7 @@ public class SearchManager {
 			Date dateLower, Date dateHigher,int minAvailableSeats,String destination,String departure,
 			String type, String name) throws NoSuchElementException{
 		
-		// Bý til töflu, searchParams, sem mun geyma leitarskilyrðin frá notanda.
+		// Bï¿½ til tï¿½flu, searchParams, sem mun geyma leitarskilyrï¿½in frï¿½ notanda.
 		HashMap<String,Object> searchParams = new HashMap<String,Object>();
 		if(priceLower!=-1) searchParams.put("Price>=", priceLower);
 		if(priceHigher!=-1) searchParams.put("Price<=", priceHigher);
@@ -34,12 +35,12 @@ public class SearchManager {
 		if(!name.equals("")) searchParams.put("Name LIKE ", name);
 		
 		
-		// Bý til lista af Tour hlutum miðað við leitarskilyrðin.
+		// Bï¿½ til lista af Tour hlutum miï¿½aï¿½ viï¿½ leitarskilyrï¿½in.
 		String[][] dbData = DBManager.getData("*","Tours",searchParams);
 		
-		// hreinsa gömlu leitarniðurstöðurnar úr tours (ef einhverjar eru).
+		// hreinsa gï¿½mlu leitarniï¿½urstï¿½ï¿½urnar ï¿½r tours (ef einhverjar eru).
 		tours.clear();
-		// Bý til Tour-hluti í samræmi við leitarniðurstöður og set í listann tours.
+		// Bï¿½ til Tour-hluti ï¿½ samrï¿½mi viï¿½ leitarniï¿½urstï¿½ï¿½ur og set ï¿½ listann tours.
 		for(int i=0; i<dbData.length;i++){
 			tours.add(new Tour(dbData[i][0],dbData[i][1],Integer.valueOf(dbData[i][2]),dbData[i][3],
 				Integer.valueOf(dbData[i][4]),Float.valueOf(dbData[i][5]),Integer.valueOf(dbData[i][6]),
@@ -51,19 +52,19 @@ public class SearchManager {
 
 	public static void bookTourSeats(String tourName, int bookedSeats) throws NoSuchElementException, IllegalArgumentException{
 
-		// Byrjum að athuga núverandi sætafjölda.
+		// Byrjum aï¿½ athuga nï¿½verandi sï¿½tafjï¿½lda.
 		HashMap<String,Object> whereParams = new HashMap<String,Object>();
 		whereParams.put("Name=", tourName);
 		String[][] seatData = DBManager.getData("SeatsAvailable", "Tours", whereParams);
 		int seats = Integer.parseInt(seatData[0][0]);
 		if(bookedSeats<0) throw new IllegalArgumentException("Second input parameter must be positive.");
 		
-		// Lækkum sætafjöldann til að tákna að bókun hafi átt sér stað að því gefnu að nægilegt sætamagn sé í boði.
+		// Lï¿½kkum sï¿½tafjï¿½ldann til aï¿½ tï¿½kna aï¿½ bï¿½kun hafi ï¿½tt sï¿½r staï¿½ aï¿½ ï¿½vï¿½ gefnu aï¿½ nï¿½gilegt sï¿½tamagn sï¿½ ï¿½ boï¿½i.
 		if(seats>bookedSeats){
 			DBManager.updateTable("Tours", "SeatsAvailable", String.valueOf(seats-bookedSeats), whereParams);
 		} else throw new IllegalArgumentException("Too few seats available.");
 		
-		// Ef að túrinn er í núverandi tours lista, update-um við hann líka.
+		// Ef aï¿½ tï¿½rinn er ï¿½ nï¿½verandi tours lista, update-um viï¿½ hann lï¿½ka.
 		for(Tour tour: tours){
 			if(tour.getName()==tourName){
 				tour.bookSeats(bookedSeats);
@@ -74,43 +75,60 @@ public class SearchManager {
 	public static void updateRating(String tourName, int newRating) throws NoSuchElementException, IllegalArgumentException{
 
 		if(newRating<0 || newRating>5) throw new IllegalArgumentException("Rating is on scale from 0 to 5");
-		// Sækjum fjölda einkunnagjafa og núverandi einkunn.
+		// Sï¿½kjum fjï¿½lda einkunnagjafa og nï¿½verandi einkunn.
 		HashMap<String,Object> whereParams = new HashMap<String,Object>();
 		whereParams.put("Name=", tourName);
 		String[][] RatingData = DBManager.getData("NumberOfRatings, Rating", "Tours", whereParams);
 		int amountOfRatings = Integer.parseInt(RatingData[0][0]);
 		float oldRating = Float.parseFloat(RatingData[0][1]);
 		
-		// Reiknum út nýju einkunnina
+		// Reiknum ï¿½t nï¿½ju einkunnina
 		int expanded = (int)(oldRating*amountOfRatings)+newRating;
 		amountOfRatings++;
 		float rating = (float)expanded/amountOfRatings;
 		
-		// Skrifum fjölda einkunna ásamt nýju einkunninni í gagnagrunninn.
+		// Skrifum fjï¿½lda einkunna ï¿½samt nï¿½ju einkunninni ï¿½ gagnagrunninn.
 		DBManager.updateTable("Tours", "NumberOfRatings", String.valueOf(amountOfRatings), whereParams);
 		DBManager.updateTable("Tours", "Rating", String.valueOf(rating), whereParams);
 		
-		// Uppfærum túrinn ef hann er í núverandi lista.
+		// Uppfï¿½rum tï¿½rinn ef hann er ï¿½ nï¿½verandi lista.
 		for(Tour tour: tours){
 			if(tour.getName()==tourName){
 				tour.updateRating(rating, amountOfRatings);
 			}
 		}
 	}
+
+	
     
 	// Bara fyrir testing.
     public static boolean isToursEmpty(){
         return false;
     }
 	
-	// bara fyrir testing til að athuga innihald tours.
+	// bara fyrir testing til aï¿½ athuga innihald tours.
 	public static ArrayList<Tour> getTours(){
 		return tours;
 	}
-	
+    /* Ã¾arf bara kommenta Ã¾etta frÃ¡ 
+    public static void sortList(String field, boolean inDecOrder) {
+        Collections.sort(ArrayList<Tour>, new SeatsComparator() );
+    }
+	*/
+
 	public static void main(String[] args) {
 
-		// TODO main fara eitthvert annað, líklega display. controllerinn á ekki að eiga eintak af view.
+		// TODO main fara eitthvert annaï¿½, lï¿½klega display. controllerinn ï¿½ ekki aï¿½ eiga eintak af view.
 		Display view = new MockDisplay();
+
 	}
+
 }
+
+class SeatsComparator implements Comparator<Integer> {
+    @Override
+    public int compare(Integer s1, Integer s2) {
+        return s1.compareTo(s2);
+    }
+}
+
